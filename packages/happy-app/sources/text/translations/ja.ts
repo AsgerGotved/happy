@@ -22,6 +22,7 @@ export const ja: TranslationStructure = {
         // Tab navigation labels
         inbox: '受信トレイ',
         sessions: 'ターミナル',
+        hatchling: 'Hatchling',
         settings: '設定',
     },
 
@@ -30,6 +31,20 @@ export const ja: TranslationStructure = {
         emptyTitle: '受信トレイは空です',
         emptyDescription: '友達と接続してセッションを共有しましょう',
         updates: '更新',
+    },
+
+    hatchling: {
+        placeholder: 'Message Hatchling...',
+        connecting: 'Connecting...',
+        connected: 'Connected',
+        disconnected: 'Disconnected',
+        reconnecting: 'Reconnecting...',
+        error: 'Connection error',
+        emptyTitle: 'Chat with Hatchling',
+        emptyDescription: 'Send a message to start a conversation with your AI agent',
+        tokenMissing: 'Gateway not configured',
+        tokenMissingDescription: 'Add your OpenClaw token in Settings to use Hatchling',
+        goToSettings: 'Open Settings',
     },
 
     common: {
@@ -168,6 +183,11 @@ export const ja: TranslationStructure = {
         usageSubtitle: 'API使用量とコストを確認',
         profiles: 'プロファイル',
         profilesSubtitle: 'セッション用の環境変数プロファイルを管理',
+        hatchlingUrl: 'Gateway URL',
+        hatchlingUrlDescription: 'WebSocket URL for the OpenClaw gateway',
+        hatchlingToken: 'Gateway Token',
+        hatchlingTokenDescription: 'Auth token from your OpenClaw config',
+        notConfigured: 'Not configured',
 
         // Dynamic settings messages
         accountConnected: ({ service }: { service: string }) => `${service}アカウントが接続されました`,

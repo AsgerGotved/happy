@@ -13,6 +13,9 @@ export const LocalSettingsSchema = z.object({
     markdownCopyV2: z.boolean().describe('Replace native paragraph selection with long-press modal for full markdown copy'),
     // CLI version acknowledgments - keyed by machineId
     acknowledgedCliVersions: z.record(z.string(), z.string()).describe('Acknowledged CLI versions per machine'),
+    // OpenClaw / Hatchling gateway settings
+    openclawToken: z.string().describe('OpenClaw gateway auth token'),
+    openclawUrl: z.string().describe('OpenClaw gateway WebSocket URL (wss://...)'),
 });
 
 //
@@ -35,6 +38,8 @@ export const localSettingsDefaults: LocalSettings = {
     themePreference: 'adaptive',
     markdownCopyV2: false,
     acknowledgedCliVersions: {},
+    openclawToken: '',
+    openclawUrl: 'wss://openclaw.nytorv.com',
 };
 Object.freeze(localSettingsDefaults);
 

@@ -35,6 +35,8 @@ export const SettingsView = React.memo(function SettingsView() {
     const appVersion = Constants.expoConfig?.version || '1.0.0';
     const auth = useAuth();
     const [devModeEnabled, setDevModeEnabled] = useLocalSettingMutable('devModeEnabled');
+    const [openclawToken, setOpenclawToken] = useLocalSettingMutable('openclawToken');
+    const [openclawUrl, setOpenclawUrl] = useLocalSettingMutable('openclawUrl');
     const isPro = __DEV__ || useEntitlement('pro');
     const experiments = useSetting('experiments');
     const isCustomServer = isUsingCustomServer();
@@ -336,6 +338,36 @@ export const SettingsView = React.memo(function SettingsView() {
                         onPress={() => router.push('/settings/usage')}
                     />
                 )}
+            </ItemGroup>
+
+            {/* Hatchling / OpenClaw */}
+            <ItemGroup title={t('tabs.hatchling')}>
+                <Item
+                    title={t('settings.hatchlingUrl')}
+                    detail={openclawUrl || t('common.urlPlaceholder')}
+                    icon={<Ionicons name="globe-outline" size={29} color="#34C759" />}
+                    onPress={async () => {
+                        const url = await Modal.prompt(
+                            t('settings.hatchlingUrl'),
+                            t('settings.hatchlingUrlDescription'),
+                            { placeholder: 'wss://openclaw.nytorv.com', defaultValue: openclawUrl, confirmText: t('common.save') }
+                        );
+                        if (url?.trim()) setOpenclawUrl(url.trim());
+                    }}
+                />
+                <Item
+                    title={t('settings.hatchlingToken')}
+                    detail={openclawToken ? '••••' + openclawToken.slice(-6) : t('settings.notConfigured')}
+                    icon={<Ionicons name="key-outline" size={29} color="#34C759" />}
+                    onPress={async () => {
+                        const token = await Modal.prompt(
+                            t('settings.hatchlingToken'),
+                            t('settings.hatchlingTokenDescription'),
+                            { placeholder: 'dcd7b16...', defaultValue: openclawToken, confirmText: t('common.save') }
+                        );
+                        if (token?.trim()) setOpenclawToken(token.trim());
+                    }}
+                />
             </ItemGroup>
 
             {/* Developer */}

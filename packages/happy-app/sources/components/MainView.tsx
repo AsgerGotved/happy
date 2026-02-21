@@ -12,6 +12,7 @@ import { TabBar, TabType } from './TabBar';
 import { InboxView } from './InboxView';
 import { SettingsViewWrapper } from './SettingsViewWrapper';
 import { SessionsListWrapper } from './SessionsListWrapper';
+import { HatchlingChatWrapper } from './HatchlingChatWrapper';
 import { Header } from './navigation/Header';
 import { HeaderLogo } from './HeaderLogo';
 import { VoiceAssistantStatusBar } from './VoiceAssistantStatusBar';
@@ -102,11 +103,12 @@ const styles = StyleSheet.create((theme) => ({
 const TAB_TITLES = {
     sessions: 'tabs.sessions',
     inbox: 'tabs.inbox',
+    hatchling: 'tabs.hatchling',
     settings: 'tabs.settings',
 } as const;
 
 // Active tabs
-type ActiveTabType = 'sessions' | 'inbox' | 'settings';
+type ActiveTabType = 'sessions' | 'inbox' | 'hatchling' | 'settings';
 
 // Header title component with connection status
 const HeaderTitle = React.memo(({ activeTab }: { activeTab: ActiveTabType }) => {
@@ -220,6 +222,11 @@ const HeaderRight = React.memo(({ activeTab }: { activeTab: ActiveTabType }) => 
         );
     }
 
+    if (activeTab === 'hatchling') {
+        // Empty view to maintain header centering
+        return <View style={styles.headerButton} />;
+    }
+
     return null;
 });
 
@@ -250,6 +257,8 @@ export const MainView = React.memo(({ variant }: MainViewProps) => {
                 return <InboxView />;
             case 'settings':
                 return <SettingsViewWrapper />;
+            case 'hatchling':
+                return <HatchlingChatWrapper />;
             case 'sessions':
             default:
                 return <SessionsListWrapper />;

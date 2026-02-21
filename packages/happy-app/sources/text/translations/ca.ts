@@ -19,6 +19,7 @@ export const ca: TranslationStructure = {
         // Tab navigation labels
         inbox: 'Safata',
         sessions: 'Terminals',
+        hatchling: 'Hatchling',
         settings: 'Configuració',
     },
 
@@ -27,6 +28,20 @@ export const ca: TranslationStructure = {
         emptyTitle: 'Safata buida',
         emptyDescription: 'Connecta\'t amb amics per començar a compartir sessions',
         updates: 'Actualitzacions',
+    },
+
+    hatchling: {
+        placeholder: 'Message Hatchling...',
+        connecting: 'Connecting...',
+        connected: 'Connected',
+        disconnected: 'Disconnected',
+        reconnecting: 'Reconnecting...',
+        error: 'Connection error',
+        emptyTitle: 'Chat with Hatchling',
+        emptyDescription: 'Send a message to start a conversation with your AI agent',
+        tokenMissing: 'Gateway not configured',
+        tokenMissingDescription: 'Add your OpenClaw token in Settings to use Hatchling',
+        goToSettings: 'Open Settings',
     },
 
     common: {
@@ -136,6 +151,11 @@ export const ca: TranslationStructure = {
         usageSubtitle: "Veure l'ús de l'API i costos",
         profiles: 'Perfils',
         profilesSubtitle: 'Gestiona els perfils d\'entorn i variables',
+        hatchlingUrl: 'Gateway URL',
+        hatchlingUrlDescription: 'WebSocket URL for the OpenClaw gateway',
+        hatchlingToken: 'Gateway Token',
+        hatchlingTokenDescription: 'Auth token from your OpenClaw config',
+        notConfigured: 'Not configured',
 
         // Dynamic settings messages
         accountConnected: ({ service }: { service: string }) => `Compte de ${service} connectat`,

@@ -21,6 +21,7 @@ export const zhHant: TranslationStructure = {
         // Tab navigation labels
         inbox: '收件匣',
         sessions: '終端',
+        hatchling: 'Hatchling',
         settings: '設定',
     },
 
@@ -29,6 +30,20 @@ export const zhHant: TranslationStructure = {
         emptyTitle: '收件匣是空的',
         emptyDescription: '與好友建立連結，開始共享工作階段',
         updates: '更新',
+    },
+
+    hatchling: {
+        placeholder: 'Message Hatchling...',
+        connecting: 'Connecting...',
+        connected: 'Connected',
+        disconnected: 'Disconnected',
+        reconnecting: 'Reconnecting...',
+        error: 'Connection error',
+        emptyTitle: 'Chat with Hatchling',
+        emptyDescription: 'Send a message to start a conversation with your AI agent',
+        tokenMissing: 'Gateway not configured',
+        tokenMissingDescription: 'Add your OpenClaw token in Settings to use Hatchling',
+        goToSettings: 'Open Settings',
     },
 
     common: {
@@ -137,6 +152,11 @@ export const zhHant: TranslationStructure = {
         usageSubtitle: '查看 API 使用情況和費用',
         profiles: '設定檔',
         profilesSubtitle: '管理工作階段的環境變數設定檔',
+        hatchlingUrl: 'Gateway URL',
+        hatchlingUrlDescription: 'WebSocket URL for the OpenClaw gateway',
+        hatchlingToken: 'Gateway Token',
+        hatchlingTokenDescription: 'Auth token from your OpenClaw config',
+        notConfigured: 'Not configured',
 
         // Dynamic settings messages
         accountConnected: ({ service }: { service: string }) => `已連結 ${service} 帳戶`,

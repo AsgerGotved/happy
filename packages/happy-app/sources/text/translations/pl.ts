@@ -30,6 +30,7 @@ export const pl: TranslationStructure = {
         // Tab navigation labels
         inbox: 'Skrzynka',
         sessions: 'Terminale',
+        hatchling: 'Hatchling',
         settings: 'Ustawienia',
     },
 
@@ -38,6 +39,20 @@ export const pl: TranslationStructure = {
         emptyTitle: 'Pusta skrzynka',
         emptyDescription: 'Połącz się z przyjaciółmi, aby zacząć udostępniać sesje',
         updates: 'Aktualizacje',
+    },
+
+    hatchling: {
+        placeholder: 'Message Hatchling...',
+        connecting: 'Connecting...',
+        connected: 'Connected',
+        disconnected: 'Disconnected',
+        reconnecting: 'Reconnecting...',
+        error: 'Connection error',
+        emptyTitle: 'Chat with Hatchling',
+        emptyDescription: 'Send a message to start a conversation with your AI agent',
+        tokenMissing: 'Gateway not configured',
+        tokenMissingDescription: 'Add your OpenClaw token in Settings to use Hatchling',
+        goToSettings: 'Open Settings',
     },
 
     common: {
@@ -147,6 +162,11 @@ export const pl: TranslationStructure = {
         usageSubtitle: 'Zobacz użycie API i koszty',
         profiles: 'Profile',
         profilesSubtitle: 'Zarządzaj profilami zmiennych środowiskowych dla sesji',
+        hatchlingUrl: 'Gateway URL',
+        hatchlingUrlDescription: 'WebSocket URL for the OpenClaw gateway',
+        hatchlingToken: 'Gateway Token',
+        hatchlingTokenDescription: 'Auth token from your OpenClaw config',
+        notConfigured: 'Not configured',
 
         // Dynamic settings messages
         accountConnected: ({ service }: { service: string }) => `Konto ${service} połączone`,
