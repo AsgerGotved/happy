@@ -52,8 +52,11 @@ const styles = StyleSheet.create((theme) => ({
     },
     userMessageText: {
         color: theme.colors.text,
-        fontSize: 15,
-        lineHeight: 21,
+        fontSize: 16,
+        lineHeight: 24,
+        marginTop: 8,
+        marginBottom: 8,
+        fontWeight: '400',
         ...Typography.default(),
     },
     // Assistant message — mirrors MessageView.agentMessageContainer
@@ -65,8 +68,11 @@ const styles = StyleSheet.create((theme) => ({
     },
     agentMessageText: {
         color: theme.colors.text,
-        fontSize: 15,
-        lineHeight: 21,
+        fontSize: 16,
+        lineHeight: 24,
+        marginTop: 8,
+        marginBottom: 8,
+        fontWeight: '400',
         ...Typography.default(),
     },
     cursor: {
