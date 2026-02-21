@@ -158,10 +158,10 @@ export function useOpenClawChat() {
                     minProtocol: 3,
                     maxProtocol: 3,
                     client: {
-                        id: 'happy-fork',
+                        id: 'cli',
                         version: '0.1.0',
                         platform: 'mobile',
-                        mode: 'operator',
+                        mode: 'cli',
                     },
                     role: 'operator',
                     scopes: ['operator.read', 'operator.write'],
