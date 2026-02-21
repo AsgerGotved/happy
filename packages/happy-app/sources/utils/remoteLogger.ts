@@ -28,7 +28,7 @@ export function monkeyPatchConsoleForRemoteLoggingForFasterAiAutoDebuggingOnlyIn
     debug: console.debug,
   }
 
-  const url = config.serverUrl
+  const url = process.env.EXPO_PUBLIC_LOG_SERVER_URL || config.serverUrl
   
   if (!url) {
     console.log('[RemoteLogger] No server URL provided, remote logging disabled')
