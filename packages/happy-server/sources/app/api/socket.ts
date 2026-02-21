@@ -12,8 +12,57 @@ import { sessionUpdateHandler } from "./socket/sessionUpdateHandler";
 import { machineUpdateHandler } from "./socket/machineUpdateHandler";
 import { artifactUpdateHandler } from "./socket/artifactUpdateHandler";
 import { accessKeyHandler } from "./socket/accessKeyHandler";
+import { createConnection } from "net";
+import type { IncomingMessage } from "http";
+import type { Duplex } from "stream";
+
+const OPENCLAW_GATEWAY_PORT = 18789;
+const SOCKET_IO_PATH = '/v1/updates';
+
+// Proxy raw WebSocket upgrade requests to the OpenClaw gateway.
+// Must be registered via prependListener BEFORE socket.io attaches its own
+// upgrade handler, so we get first access to the socket. engine.io will
+// subsequently check the path (/v1/updates vs /), find no match, and schedule
+// a destroy after 1 000 ms — but by then the upstream has already written the
+// 101 response and bytesWritten > 0, so engine.io skips the destroy.
+function proxyOpenClawUpgrade(req: IncomingMessage, socket: Duplex, head: Buffer) {
+    const remote = (socket as any).remoteAddress ?? '?';
+    log({ module: 'openclaw-proxy' }, `WS connect ${remote} → :${OPENCLAW_GATEWAY_PORT}${req.url}`);
+
+    const upstream = createConnection(OPENCLAW_GATEWAY_PORT, '127.0.0.1');
+
+    upstream.once('connect', () => {
+        const requestLine = `${req.method} ${req.url} HTTP/1.1`;
+        const headers = Object.entries(req.headers)
+            .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
+            .join('\r\n');
+        upstream.write(`${requestLine}\r\n${headers}\r\n\r\n`);
+        if (head.length > 0) upstream.write(head);
+        upstream.pipe(socket as any);
+        (socket as any).pipe(upstream);
+    });
+
+    upstream.on('error', (err) => {
+        log({ module: 'openclaw-proxy', level: 'error' }, `Upstream error: ${err.message}`);
+        try { socket.destroy(); } catch { /* ignore */ }
+    });
+    socket.on('error', (err) => {
+        log({ module: 'openclaw-proxy', level: 'warn' }, `Client error: ${err.message}`);
+        try { upstream.destroy(); } catch { /* ignore */ }
+    });
+    upstream.on('close', () => { try { socket.destroy(); } catch { /* ignore */ } });
+    socket.on('close', () => { try { upstream.destroy(); } catch { /* ignore */ } });
+}
 
 export function startSocket(app: Fastify) {
+    // Register proxy BEFORE socket.io so we get first pick of the upgrade event
+    app.server.prependListener('upgrade', (req: IncomingMessage, socket: Duplex, head: Buffer) => {
+        const path = (req.url ?? '/').split('?')[0];
+        if (path !== SOCKET_IO_PATH) {
+            proxyOpenClawUpgrade(req, socket, head);
+        }
+    });
+
     const io = new Server(app.server, {
         cors: {
             origin: "*",

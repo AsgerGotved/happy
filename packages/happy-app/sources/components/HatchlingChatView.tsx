@@ -16,6 +16,7 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Typography } from '@/constants/Typography';
 import { t } from '@/text';
+import { useHeaderHeight } from '@/utils/responsive';
 import { useLocalSetting } from '@/sync/storage';
 import { StatusDot } from './StatusDot';
 import { useOpenClawChat, ChatMessage, ConnectionStatus } from '@/hooks/useOpenClawChat';
@@ -217,6 +218,7 @@ const keyExtractor = (item: ChatMessage) => item.id;
 export const HatchlingChatView = React.memo(() => {
     const { theme } = useUnistyles();
     const insets = useSafeAreaInsets();
+    const headerHeight = useHeaderHeight();
     const openclawToken = useLocalSetting('openclawToken');
     const { messages, status, isStreaming, sendMessage, abort } = useOpenClawChat();
     const [inputText, setInputText] = React.useState('');
@@ -258,8 +260,8 @@ export const HatchlingChatView = React.memo(() => {
     return (
         <KeyboardAvoidingView
             style={styles.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            keyboardVerticalOffset={0}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={insets.top + headerHeight}
         >
             {/* Connection status strip */}
             <View style={styles.statusBar}>
