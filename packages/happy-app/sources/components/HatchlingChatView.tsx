@@ -2,40 +2,25 @@ import * as React from 'react';
 import {
     View,
     FlatList,
-    TextInput,
-    Pressable,
     Text,
-    KeyboardAvoidingView,
     Platform,
     ListRenderItemInfo,
+    Pressable,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
-import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Typography } from '@/constants/Typography';
 import { t } from '@/text';
-import { useHeaderHeight } from '@/utils/responsive';
 import { useLocalSetting } from '@/sync/storage';
-import { StatusDot } from './StatusDot';
+import { AgentInput } from './AgentInput';
 import { useOpenClawChat, ChatMessage, ConnectionStatus } from '@/hooks/useOpenClawChat';
 
 const styles = StyleSheet.create((theme) => ({
     container: {
         flex: 1,
         backgroundColor: theme.colors.groupped.background,
-    },
-    statusBar: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 6,
-    },
-    statusText: {
-        fontSize: 12,
-        marginLeft: 4,
-        ...Typography.default(),
     },
     messagesList: {
         flex: 1,
@@ -84,34 +69,10 @@ const styles = StyleSheet.create((theme) => ({
         opacity: 0.7,
     },
     inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-        paddingHorizontal: 12,
-        paddingTop: 8,
-        paddingBottom: 8,
-        backgroundColor: theme.colors.surface,
+        paddingHorizontal: 8,
+        backgroundColor: theme.colors.groupped.background,
         borderTopWidth: 1,
         borderTopColor: theme.colors.divider,
-        gap: 8,
-    },
-    textInput: {
-        flex: 1,
-        backgroundColor: theme.colors.groupped.background,
-        borderRadius: 20,
-        paddingHorizontal: 16,
-        paddingTop: 10,
-        paddingBottom: 10,
-        fontSize: 15,
-        maxHeight: 120,
-        ...Typography.default(),
-    },
-    sendButton: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 2,
     },
     emptyContainer: {
         flex: 1,
@@ -218,7 +179,6 @@ const keyExtractor = (item: ChatMessage) => item.id;
 export const HatchlingChatView = React.memo(() => {
     const { theme } = useUnistyles();
     const insets = useSafeAreaInsets();
-    const headerHeight = useHeaderHeight();
     const openclawToken = useLocalSetting('openclawToken');
     const { messages, status, isStreaming, sendMessage, abort } = useOpenClawChat();
     const [inputText, setInputText] = React.useState('');
@@ -233,46 +193,42 @@ export const HatchlingChatView = React.memo(() => {
         setInputText('');
     }, [inputText, canSend, sendMessage]);
 
-    const statusColor = React.useMemo(() => {
-        const map: Record<ConnectionStatus, string> = {
-            connected: theme.colors.status.connected,
-            connecting: theme.colors.status.connecting,
-            disconnected: theme.colors.status.disconnected,
-            error: theme.colors.status.error,
+    const connectionStatus = React.useMemo(() => {
+        const map: Record<ConnectionStatus, { text: string; color: string; dotColor: string; isPulsing: boolean }> = {
+            connected: {
+                text: t('hatchling.connected'),
+                color: theme.colors.status.connected,
+                dotColor: theme.colors.status.connected,
+                isPulsing: false,
+            },
+            connecting: {
+                text: t('hatchling.connecting'),
+                color: theme.colors.status.connecting,
+                dotColor: theme.colors.status.connecting,
+                isPulsing: true,
+            },
+            disconnected: {
+                text: t('hatchling.disconnected'),
+                color: theme.colors.status.disconnected,
+                dotColor: theme.colors.status.disconnected,
+                isPulsing: false,
+            },
+            error: {
+                text: t('hatchling.error'),
+                color: theme.colors.status.error,
+                dotColor: theme.colors.status.error,
+                isPulsing: false,
+            },
         };
         return map[status];
     }, [status, theme]);
-
-    const statusLabel = React.useMemo(() => {
-        const map: Record<ConnectionStatus, string> = {
-            connected: t('hatchling.connected'),
-            connecting: t('hatchling.connecting'),
-            disconnected: t('hatchling.disconnected'),
-            error: t('hatchling.error'),
-        };
-        return map[status];
-    }, [status]);
 
     if (!openclawToken) {
         return <View style={styles.container}><ConfigPrompt /></View>;
     }
 
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={insets.top + headerHeight}
-        >
-            {/* Connection status strip */}
-            <View style={styles.statusBar}>
-                <StatusDot
-                    color={statusColor}
-                    isPulsing={status === 'connecting'}
-                    size={6}
-                />
-                <Text style={[styles.statusText, { color: statusColor }]}>{statusLabel}</Text>
-            </View>
-
+        <View style={[styles.container, { paddingBottom: insets.bottom }]}>
             {/* Message list */}
             {messages.length === 0 ? (
                 <EmptyState />
@@ -291,37 +247,21 @@ export const HatchlingChatView = React.memo(() => {
                 />
             )}
 
-            {/* Input bar */}
-            <View style={[styles.inputContainer, { paddingBottom: Math.max(insets.bottom, 8) }]}>
-                <TextInput
-                    style={[styles.textInput, { color: theme.colors.text }]}
+            {/* Input bar — same AgentInput as the sessions tab, status shown inside it */}
+            <View style={styles.inputContainer}>
+                <AgentInput
+                    placeholder={t('hatchling.placeholder')}
                     value={inputText}
                     onChangeText={setInputText}
-                    placeholder={t('hatchling.placeholder')}
-                    placeholderTextColor={theme.colors.textSecondary}
-                    multiline
-                    returnKeyType="default"
-                    onSubmitEditing={Platform.OS === 'ios' ? undefined : handleSend}
+                    onSend={handleSend}
+                    isSendDisabled={!canSend}
+                    showAbortButton={isStreaming}
+                    onAbort={abort}
+                    connectionStatus={connectionStatus}
+                    autocompletePrefixes={[]}
+                    autocompleteSuggestions={() => Promise.resolve([])}
                 />
-                {isStreaming ? (
-                    <Pressable style={styles.sendButton} onPress={abort} hitSlop={8}>
-                        <Ionicons name="stop-circle" size={30} color={theme.colors.status.error} />
-                    </Pressable>
-                ) : (
-                    <Pressable
-                        style={styles.sendButton}
-                        onPress={handleSend}
-                        disabled={!canSend}
-                        hitSlop={8}
-                    >
-                        <Ionicons
-                            name="send"
-                            size={22}
-                            color={canSend ? theme.colors.textLink : theme.colors.textSecondary}
-                        />
-                    </Pressable>
-                )}
             </View>
-        </KeyboardAvoidingView>
+        </View>
     );
 });
