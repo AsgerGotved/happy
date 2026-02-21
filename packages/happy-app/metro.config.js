@@ -20,4 +20,12 @@ config.transformer.getTransformOptions = async () => ({
   },
 });
 
+// Use in-memory MMKV mock in Expo Go (no native modules available)
+if (process.env.EXPO_OFFLINE) {
+    config.resolver.extraNodeModules = {
+        ...config.resolver.extraNodeModules,
+        'react-native-mmkv': require.resolve('./mmkv-mock.js'),
+    };
+}
+
 module.exports = config;

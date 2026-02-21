@@ -28,7 +28,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:902947412706:android:eb8bccdbb85f0a371b9cbb",
         "android_client_info": {
-          "package_name": "com.slopus.happy.dev"
+          "package_name": "com.gotved.happy.dev"
         }
       },
       "oauth_client": [],
@@ -47,7 +47,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:902947412706:android:03fd92ac3c9813651b9cbb",
         "android_client_info": {
-          "package_name": "com.slopus.happy.preview"
+          "package_name": "com.gotved.happy.preview"
         }
       },
       "oauth_client": [],

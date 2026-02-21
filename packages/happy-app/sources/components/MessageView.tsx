@@ -1,5 +1,6 @@
 import * as React from "react";
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet } from 'react-native-unistyles';
 import { MarkdownView } from "./markdown/MarkdownView";
 import { t } from '@/text';
@@ -90,6 +91,7 @@ function AgentTextBlock(props: {
   sessionId: string;
 }) {
   const experiments = useSetting('experiments');
+  const [expanded, setExpanded] = React.useState(false);
   const handleOptionPress = React.useCallback((option: Option) => {
     sync.sendMessage(props.sessionId, option.title);
   }, [props.sessionId]);
@@ -99,8 +101,29 @@ function AgentTextBlock(props: {
     return null;
   }
 
+  if (props.message.isThinking) {
+    return (
+      <View style={styles.agentMessageContainer}>
+        <Pressable
+          onPress={() => setExpanded(e => !e)}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 4, opacity: 0.5 }}
+        >
+          <Ionicons name={expanded ? 'chevron-down' : 'chevron-forward'} size={12} color="#888" />
+          <Text style={{ fontSize: 13, color: '#888', fontStyle: 'italic' }}>
+            Thinking
+          </Text>
+        </Pressable>
+        {expanded && (
+          <View style={{ marginTop: 8, opacity: 0.5 }}>
+            <MarkdownView markdown={props.message.text} onOptionPress={handleOptionPress} />
+          </View>
+        )}
+      </View>
+    );
+  }
+
   return (
-    <View style={[styles.agentMessageContainer, props.message.isThinking && { opacity: 0.3 }]}>
+    <View style={styles.agentMessageContainer}>
       <MarkdownView markdown={props.message.text} onOptionPress={handleOptionPress} />
     </View>
   );

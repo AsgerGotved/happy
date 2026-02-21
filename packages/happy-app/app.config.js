@@ -5,8 +5,8 @@ const name = {
     production: "Happy"
 }[variant];
 const bundleId = {
-    development: "com.slopus.happy.dev",
-    preview: "com.slopus.happy.preview",
+    development: "com.gotved.happy.dev",
+    preview: "com.gotved.happy.preview",
     production: "com.ex3ndr.happy"
 }[variant];
 
@@ -150,10 +150,7 @@ export default {
             ]
         ],
         updates: {
-            url: "https://u.expo.dev/4558dd3d-cd5a-47cd-bad9-e591a241cc06",
-            requestHeaders: {
-                "expo-channel-name": "production"
-            }
+            enabled: false
         },
         experiments: {
             typedRoutes: true
@@ -163,7 +160,7 @@ export default {
                 root: "./sources/app"
             },
             eas: {
-                projectId: "4558dd3d-cd5a-47cd-bad9-e591a241cc06"
+                projectId: "0abc2421-563e-4adb-ba49-3beae8b62582"
             },
             app: {
                 postHogKey: process.env.EXPO_PUBLIC_POSTHOG_API_KEY,
@@ -172,6 +169,6 @@ export default {
                 revenueCatStripeKey: process.env.EXPO_PUBLIC_REVENUE_CAT_STRIPE
             }
         },
-        owner: "bulkacorp"
+        owner: "gotved"
     }
 };

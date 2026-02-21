@@ -825,10 +825,19 @@ export const AgentInput = React.memo(React.forwardRef<MultiTextInputHandle, Agen
                             )}
                         </View>
                         <View style={{
-                            flexDirection: 'column',
-                            alignItems: 'flex-end',
-                            minWidth: 150, // Fixed minimum width to prevent layout shift
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: 8,
                         }}>
+                            {props.modelMode && (
+                                <Text style={{
+                                    fontSize: 11,
+                                    color: theme.colors.textSecondary,
+                                    ...Typography.default()
+                                }}>
+                                    {props.modelMode.name}
+                                </Text>
+                            )}
                             {displayPermissionMode && (
                                 <Text style={{
                                     fontSize: 11,
@@ -839,19 +848,10 @@ export const AgentInput = React.memo(React.forwardRef<MultiTextInputHandle, Agen
                                                     permissionModeKey === 'read-only' ? theme.colors.permission.readOnly :
                                                         permissionModeKey === 'safe-yolo' ? theme.colors.permission.safeYolo :
                                                             permissionModeKey === 'yolo' ? theme.colors.permission.yolo :
-                                                                theme.colors.textSecondary, // Use secondary text color for default
+                                                                theme.colors.textSecondary,
                                     ...Typography.default()
                                 }}>
                                     {withSandboxSuffix(displayPermissionMode.name, permissionModeKey)}
-                                </Text>
-                            )}
-                            {props.modelMode && (
-                                <Text style={{
-                                    fontSize: 11,
-                                    color: theme.colors.textSecondary,
-                                    ...Typography.default()
-                                }}>
-                                    {props.modelMode.name}
                                 </Text>
                             )}
                         </View>
