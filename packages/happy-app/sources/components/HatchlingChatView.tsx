@@ -15,6 +15,7 @@ import { t } from '@/text';
 import { useLocalSetting } from '@/sync/storage';
 import { AgentInput } from './AgentInput';
 import { AgentContentView } from './AgentContentView';
+import { MarkdownView } from './markdown/MarkdownView';
 import { layout } from './layout';
 import { useOpenClawChat, ChatMessage, ConnectionStatus } from '@/hooks/useOpenClawChat';
 
@@ -50,15 +51,6 @@ const styles = StyleSheet.create((theme) => ({
         marginBottom: 12,
         maxWidth: '100%',
     },
-    userMessageText: {
-        color: theme.colors.text,
-        fontSize: 16,
-        lineHeight: 24,
-        marginTop: 8,
-        marginBottom: 8,
-        fontWeight: '400',
-        ...Typography.default(),
-    },
     // Assistant message — mirrors MessageView.agentMessageContainer
     agentMessageContainer: {
         marginHorizontal: 16,
@@ -66,17 +58,11 @@ const styles = StyleSheet.create((theme) => ({
         borderRadius: 16,
         alignSelf: 'flex-start',
     },
-    agentMessageText: {
-        color: theme.colors.text,
-        fontSize: 16,
-        lineHeight: 24,
-        marginTop: 8,
-        marginBottom: 8,
-        fontWeight: '400',
-        ...Typography.default(),
-    },
     cursor: {
         opacity: 0.7,
+        fontSize: 16,
+        lineHeight: 24,
+        color: theme.colors.text,
     },
     // Empty / config states
     emptyContainer: {
@@ -136,9 +122,7 @@ const MessageBubble = React.memo(({ message }: { message: ChatMessage }) => {
                 <View style={styles.messageContent}>
                     <View style={styles.userMessageContainer}>
                         <View style={styles.userMessageBubble}>
-                            <Text style={styles.userMessageText} selectable>
-                                {message.content}
-                            </Text>
+                            <MarkdownView markdown={message.content} />
                         </View>
                     </View>
                 </View>
@@ -149,10 +133,8 @@ const MessageBubble = React.memo(({ message }: { message: ChatMessage }) => {
         <View style={styles.messageContainer} renderToHardwareTextureAndroid={true}>
             <View style={styles.messageContent}>
                 <View style={styles.agentMessageContainer}>
-                    <Text style={styles.agentMessageText} selectable>
-                        {message.content}
-                        {message.isStreaming && <Text style={styles.cursor}>▋</Text>}
-                    </Text>
+                    <MarkdownView markdown={message.content} />
+                    {message.isStreaming && <Text style={styles.cursor}>▋</Text>}
                 </View>
             </View>
         </View>
