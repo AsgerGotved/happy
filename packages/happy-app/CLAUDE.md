@@ -25,6 +25,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Production
 - `yarn ota` - Deploy over-the-air updates via EAS Update to production branch
 
+## AI Debugging / Remote Logging
+
+Mobile runtime errors are forwarded to the VPS server and written to a log file. To see errors:
+
+```bash
+# Tail errors only (warnings + errors)
+grep '"source":"mobile"' /root/projects/happy-fork/packages/happy-server/.logs/$(ls -t /root/projects/happy-fork/packages/happy-server/.logs/ | head -1) | grep -v '"level":30' | tail -30
+
+# Tail all mobile logs
+grep '"source":"mobile"' /root/projects/happy-fork/packages/happy-server/.logs/$(ls -t /root/projects/happy-fork/packages/happy-server/.logs/ | head -1) | tail -30
+```
+
+Logs are at `/root/projects/happy-fork/packages/happy-server/.logs/` on the VPS.
+
+Requires two env vars in `packages/happy-app/.env.local`:
+```
+EXPO_PUBLIC_DANGEROUSLY_LOG_TO_SERVER_FOR_AI_AUTO_DEBUGGING=true
+EXPO_PUBLIC_LOG_SERVER_URL=https://openclaw.nytorv.com
+```
+
+The log URL (`openclaw.nytorv.com`) routes via Cloudflare tunnel to the happy-server on `:3005`.
+This is separate from `EXPO_PUBLIC_HAPPY_SERVER_URL` (production auth/sync) — do not conflate them.
+
 ## Changelog Management
 
 The app includes an in-app changelog feature that displays version history to users. When making changes:
