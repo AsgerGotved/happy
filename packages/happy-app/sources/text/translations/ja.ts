@@ -22,7 +22,7 @@ export const ja: TranslationStructure = {
         // Tab navigation labels
         inbox: '受信トレイ',
         sessions: 'ターミナル',
-        hatchling: 'Hatchling',
+        agents: 'Agents',
         settings: '設定',
     },
 

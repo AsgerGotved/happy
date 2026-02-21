@@ -34,7 +34,7 @@ export const en: TranslationStructure = {
         // Tab navigation labels
         inbox: 'Inbox',
         sessions: 'Terminals',
-        hatchling: 'Hatchling',
+        agents: 'Agents',
         settings: 'Settings',
     },
 

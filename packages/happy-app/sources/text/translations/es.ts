@@ -19,7 +19,7 @@ export const es: TranslationStructure = {
         // Tab navigation labels
         inbox: 'Bandeja',
         sessions: 'Terminales',
-        hatchling: 'Hatchling',
+        agents: 'Agents',
         settings: 'Configuración',
     },
 

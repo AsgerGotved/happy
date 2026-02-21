@@ -19,7 +19,7 @@ export const en = {
         // Tab navigation labels
         inbox: 'Inbox',
         sessions: 'Terminals',
-        hatchling: 'Hatchling',
+        agents: 'Agents',
         settings: 'Settings',
     },
 

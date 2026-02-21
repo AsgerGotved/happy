@@ -30,7 +30,7 @@ export const pl: TranslationStructure = {
         // Tab navigation labels
         inbox: 'Skrzynka',
         sessions: 'Terminale',
-        hatchling: 'Hatchling',
+        agents: 'Agents',
         settings: 'Ustawienia',
     },
 

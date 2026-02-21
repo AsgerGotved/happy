@@ -100,12 +100,12 @@ const styles = StyleSheet.create((theme) => ({
 // Tab header configuration
 const TAB_TITLES = {
     sessions: 'tabs.sessions',
-    hatchling: 'tabs.hatchling',
+    agents: 'tabs.agents',
     settings: 'tabs.settings',
 } as const;
 
 // Active tabs
-type ActiveTabType = 'sessions' | 'hatchling' | 'settings';
+type ActiveTabType = 'sessions' | 'agents' | 'settings';
 
 // Header title component with connection status
 const HeaderTitle = React.memo(({ activeTab }: { activeTab: ActiveTabType }) => {
@@ -204,7 +204,7 @@ const HeaderRight = React.memo(({ activeTab }: { activeTab: ActiveTabType }) => 
         );
     }
 
-    if (activeTab === 'hatchling') {
+    if (activeTab === 'agents') {
         // Empty view to maintain header centering
         return <View style={styles.headerButton} />;
     }
@@ -236,7 +236,7 @@ export const MainView = React.memo(({ variant }: MainViewProps) => {
         switch (activeTab) {
             case 'settings':
                 return <SettingsViewWrapper />;
-            case 'hatchling':
+            case 'agents':
                 return <HatchlingChatWrapper />;
             case 'sessions':
             default:

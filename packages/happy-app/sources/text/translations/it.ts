@@ -19,7 +19,7 @@ export const it: TranslationStructure = {
         // Tab navigation labels
         inbox: 'Posta',
         sessions: 'Terminali',
-        hatchling: 'Hatchling',
+        agents: 'Agents',
         settings: 'Impostazioni',
     },
 

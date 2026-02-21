@@ -340,8 +340,8 @@ export const SettingsView = React.memo(function SettingsView() {
                 )}
             </ItemGroup>
 
-            {/* Hatchling / OpenClaw */}
-            <ItemGroup title={t('tabs.hatchling')}>
+            {/* Agents / OpenClaw */}
+            <ItemGroup title={t('tabs.agents')}>
                 <Item
                     title={t('settings.hatchlingUrl')}
                     detail={openclawUrl || t('common.urlPlaceholder')}

@@ -19,7 +19,7 @@ export const ca: TranslationStructure = {
         // Tab navigation labels
         inbox: 'Safata',
         sessions: 'Terminals',
-        hatchling: 'Hatchling',
+        agents: 'Agents',
         settings: 'Configuració',
     },
 

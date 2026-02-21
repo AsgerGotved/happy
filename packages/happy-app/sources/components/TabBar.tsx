@@ -6,7 +6,7 @@ import { Image } from 'expo-image';
 import { t } from '@/text';
 import { Typography } from '@/constants/Typography';
 import { layout } from '@/components/layout';
-export type TabType = 'sessions' | 'hatchling' | 'settings';
+export type TabType = 'sessions' | 'agents' | 'settings';
 
 interface TabBarProps {
     activeTab: TabType;
@@ -84,7 +84,7 @@ export const TabBar = React.memo(({ activeTab, onTabPress }: TabBarProps) => {
     const tabs: { key: TabType; icon: any; label: string }[] = React.useMemo(() => {
         return [
             { key: 'sessions', icon: require('@/assets/images/brutalist/Brutalism 15.png'), label: t('tabs.sessions') },
-            { key: 'hatchling', icon: require('@/assets/images/brutalist/Brutalism 21.png'), label: t('tabs.hatchling') },
+            { key: 'agents', icon: require('@/assets/images/brutalist/Brutalism 21.png'), label: t('tabs.agents') },
             { key: 'settings', icon: require('@/assets/images/brutalist/Brutalism 9.png'), label: t('tabs.settings') },
         ];
     }, []);

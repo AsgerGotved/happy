@@ -21,7 +21,7 @@ export const zhHant: TranslationStructure = {
         // Tab navigation labels
         inbox: '收件匣',
         sessions: '終端',
-        hatchling: 'Hatchling',
+        agents: 'Agents',
         settings: '設定',
     },
 
