@@ -7,7 +7,6 @@ import {
     ListRenderItemInfo,
     Pressable,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
@@ -15,71 +14,70 @@ import { Typography } from '@/constants/Typography';
 import { t } from '@/text';
 import { useLocalSetting } from '@/sync/storage';
 import { AgentInput } from './AgentInput';
+import { AgentContentView } from './AgentContentView';
+import { layout } from './layout';
 import { useOpenClawChat, ChatMessage, ConnectionStatus } from '@/hooks/useOpenClawChat';
 
 const styles = StyleSheet.create((theme) => ({
     container: {
         flex: 1,
-        backgroundColor: theme.colors.groupped.background,
-    },
-    messagesList: {
-        flex: 1,
-    },
-    messagesContent: {
-        paddingVertical: 8,
-    },
-    userBubbleWrapper: {
-        alignItems: 'flex-end',
-        marginHorizontal: 12,
-        marginVertical: 3,
-    },
-    assistantBubbleWrapper: {
-        alignItems: 'flex-start',
-        marginHorizontal: 12,
-        marginVertical: 3,
-    },
-    userBubble: {
-        backgroundColor: theme.colors.textLink,
-        padding: 12,
-        borderRadius: 18,
-        borderBottomRightRadius: 4,
-        maxWidth: '82%',
-    },
-    assistantBubble: {
         backgroundColor: theme.colors.surface,
-        padding: 12,
-        borderRadius: 18,
-        borderBottomLeftRadius: 4,
-        maxWidth: '86%',
-        borderWidth: 1,
-        borderColor: theme.colors.divider,
     },
-    messageText: {
+    // Message layout — mirrors MessageView
+    messageContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+    },
+    messageContent: {
+        flexDirection: 'column',
+        flexGrow: 1,
+        flexBasis: 0,
+        maxWidth: layout.maxWidth,
+    },
+    // User bubble — mirrors MessageView.userMessageContainer / userMessageBubble
+    userMessageContainer: {
+        maxWidth: '100%',
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        justifyContent: 'flex-end',
+        paddingHorizontal: 16,
+    },
+    userMessageBubble: {
+        backgroundColor: theme.colors.userMessageBackground,
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 12,
+        marginBottom: 12,
+        maxWidth: '100%',
+    },
+    userMessageText: {
+        color: theme.colors.text,
         fontSize: 15,
         lineHeight: 21,
         ...Typography.default(),
     },
-    userMessageText: {
-        color: theme.colors.header.tint,
+    // Assistant message — mirrors MessageView.agentMessageContainer
+    agentMessageContainer: {
+        marginHorizontal: 16,
+        marginBottom: 12,
+        borderRadius: 16,
+        alignSelf: 'flex-start',
     },
-    assistantMessageText: {
+    agentMessageText: {
         color: theme.colors.text,
+        fontSize: 15,
+        lineHeight: 21,
+        ...Typography.default(),
     },
     cursor: {
         opacity: 0.7,
     },
-    inputContainer: {
-        paddingHorizontal: 8,
-        backgroundColor: theme.colors.groupped.background,
-        borderTopWidth: 1,
-        borderTopColor: theme.colors.divider,
-    },
+    // Empty / config states
     emptyContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 32,
-        paddingBottom: 80,
     },
     emptyIcon: {
         width: 56,
@@ -106,7 +104,6 @@ const styles = StyleSheet.create((theme) => ({
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 32,
-        paddingBottom: 80,
     },
     configButton: {
         marginTop: 20,
@@ -124,23 +121,39 @@ const styles = StyleSheet.create((theme) => ({
 
 // --- Sub-components ---
 
+/** Mirrors MessageView's user + assistant bubble styling */
 const MessageBubble = React.memo(({ message }: { message: ChatMessage }) => {
     const isUser = message.role === 'user';
+    if (isUser) {
+        return (
+            <View style={styles.messageContainer} renderToHardwareTextureAndroid={true}>
+                <View style={styles.messageContent}>
+                    <View style={styles.userMessageContainer}>
+                        <View style={styles.userMessageBubble}>
+                            <Text style={styles.userMessageText} selectable>
+                                {message.content}
+                            </Text>
+                        </View>
+                    </View>
+                </View>
+            </View>
+        );
+    }
     return (
-        <View style={isUser ? styles.userBubbleWrapper : styles.assistantBubbleWrapper}>
-            <View style={isUser ? styles.userBubble : styles.assistantBubble}>
-                <Text
-                    style={[styles.messageText, isUser ? styles.userMessageText : styles.assistantMessageText]}
-                    selectable
-                >
-                    {message.content}
-                    {message.isStreaming && <Text style={styles.cursor}>▋</Text>}
-                </Text>
+        <View style={styles.messageContainer} renderToHardwareTextureAndroid={true}>
+            <View style={styles.messageContent}>
+                <View style={styles.agentMessageContainer}>
+                    <Text style={styles.agentMessageText} selectable>
+                        {message.content}
+                        {message.isStreaming && <Text style={styles.cursor}>▋</Text>}
+                    </Text>
+                </View>
             </View>
         </View>
     );
 });
 
+/** Shown when there are no messages yet */
 const EmptyState = React.memo(() => (
     <View style={styles.emptyContainer}>
         <Image
@@ -153,6 +166,7 @@ const EmptyState = React.memo(() => (
     </View>
 ));
 
+/** Shown when the OpenClaw token is not configured */
 const ConfigPrompt = React.memo(() => {
     const router = useRouter();
     return (
@@ -171,18 +185,19 @@ const ConfigPrompt = React.memo(() => {
     );
 });
 
-// --- Main component ---
+/** Small spacer at the visual top of the inverted list (equivalent to ChatList's ListFooterComponent) */
+const ListTopSpacer = React.memo(() => <View style={{ height: 16 }} />);
 
 const renderMessage = ({ item }: ListRenderItemInfo<ChatMessage>) => <MessageBubble message={item} />;
 const keyExtractor = (item: ChatMessage) => item.id;
 
+// --- Main component ---
+
 export const HatchlingChatView = React.memo(() => {
     const { theme } = useUnistyles();
-    const insets = useSafeAreaInsets();
     const openclawToken = useLocalSetting('openclawToken');
     const { messages, status, isStreaming, sendMessage, abort } = useOpenClawChat();
     const [inputText, setInputText] = React.useState('');
-    const listRef = React.useRef<FlatList<ChatMessage>>(null);
 
     const canSend = inputText.trim().length > 0 && status === 'connected' && !isStreaming;
 
@@ -224,44 +239,46 @@ export const HatchlingChatView = React.memo(() => {
     }, [status, theme]);
 
     if (!openclawToken) {
-        return <View style={styles.container}><ConfigPrompt /></View>;
+        return (
+            <View style={styles.container}>
+                <AgentContentView content={<ConfigPrompt />} />
+            </View>
+        );
     }
 
-    return (
-        <View style={[styles.container, { paddingBottom: insets.bottom }]}>
-            {/* Message list */}
-            {messages.length === 0 ? (
-                <EmptyState />
-            ) : (
-                <FlatList<ChatMessage>
-                    ref={listRef}
-                    data={messages}
-                    inverted
-                    keyExtractor={keyExtractor}
-                    renderItem={renderMessage}
-                    style={styles.messagesList}
-                    contentContainerStyle={styles.messagesContent}
-                    maintainVisibleContentPosition={{ minIndexForVisible: 0, autoscrollToTopThreshold: 10 }}
-                    keyboardShouldPersistTaps="handled"
-                    keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'none'}
-                />
-            )}
+    const content = messages.length === 0 ? (
+        <EmptyState />
+    ) : (
+        <FlatList<ChatMessage>
+            data={messages}
+            inverted
+            keyExtractor={keyExtractor}
+            renderItem={renderMessage}
+            maintainVisibleContentPosition={{ minIndexForVisible: 0, autoscrollToTopThreshold: 10 }}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'none'}
+            ListFooterComponent={<ListTopSpacer />}
+        />
+    );
 
-            {/* Input bar — same AgentInput as the sessions tab, status shown inside it */}
-            <View style={styles.inputContainer}>
-                <AgentInput
-                    placeholder={t('hatchling.placeholder')}
-                    value={inputText}
-                    onChangeText={setInputText}
-                    onSend={handleSend}
-                    isSendDisabled={!canSend}
-                    showAbortButton={isStreaming}
-                    onAbort={abort}
-                    connectionStatus={connectionStatus}
-                    autocompletePrefixes={[]}
-                    autocompleteSuggestions={() => Promise.resolve([])}
-                />
-            </View>
+    const input = (
+        <AgentInput
+            placeholder={t('hatchling.placeholder')}
+            value={inputText}
+            onChangeText={setInputText}
+            onSend={handleSend}
+            isSendDisabled={!canSend}
+            showAbortButton={isStreaming}
+            onAbort={abort}
+            connectionStatus={connectionStatus}
+            autocompletePrefixes={[]}
+            autocompleteSuggestions={() => Promise.resolve([])}
+        />
+    );
+
+    return (
+        <View style={styles.container}>
+            <AgentContentView content={content} input={input} />
         </View>
     );
 });
