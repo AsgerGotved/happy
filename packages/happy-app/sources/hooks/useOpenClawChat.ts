@@ -101,7 +101,7 @@ export function useOpenClawChat() {
                         ...prev,
                     ]); // prepend: newest-first for inverted FlatList
                 } else {
-                    currentStreamRef.current.text += chunk;
+                    currentStreamRef.current.text = chunk; // each delta contains full text so far (not incremental)
                     const { id, text } = currentStreamRef.current;
                     setMessages((prev) =>
                         prev.map((m) => (m.id === id ? { ...m, content: text } : m))
