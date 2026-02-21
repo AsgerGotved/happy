@@ -73,7 +73,7 @@ export function useOpenClawChat() {
                             timestamp: typeof m.timestamp === 'number' ? m.timestamp : Date.now(),
                         };
                     });
-                setMessages(history);
+                setMessages([...history].reverse()); // newest-first for inverted FlatList
                 return;
             }
         }
@@ -97,9 +97,9 @@ export function useOpenClawChat() {
                     const id = randomUUID();
                     currentStreamRef.current = { id, text: chunk };
                     setMessages((prev) => [
-                        ...prev,
                         { id, role: 'assistant', content: chunk, timestamp: Date.now(), isStreaming: true },
-                    ]);
+                        ...prev,
+                    ]); // prepend: newest-first for inverted FlatList
                 } else {
                     currentStreamRef.current.text += chunk;
                     const { id, text } = currentStreamRef.current;
@@ -210,7 +210,7 @@ export function useOpenClawChat() {
             content: text,
             timestamp: Date.now(),
         };
-        setMessages((prev) => [...prev, userMessage]);
+        setMessages((prev) => [userMessage, ...prev]); // prepend: newest-first for inverted FlatList
         setIsStreaming(true);
 
         ws.send(JSON.stringify({
