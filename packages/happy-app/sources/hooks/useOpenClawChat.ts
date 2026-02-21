@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { randomUUID } from 'expo-crypto';
+import { MMKV } from 'react-native-mmkv';
 import { useLocalSetting } from '@/sync/storage';
 
 export interface ChatMessage {
@@ -12,11 +13,51 @@ export interface ChatMessage {
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
+const mmkv = new MMKV({ id: 'hatchling-chat' });
+const MESSAGES_KEY = 'messages-v1';
+const MAX_PERSISTED = 200;
+
+function loadPersistedMessages(): ChatMessage[] {
+    try {
+        const raw = mmkv.getString(MESSAGES_KEY);
+        if (!raw) return [];
+        return JSON.parse(raw) as ChatMessage[];
+    } catch {
+        return [];
+    }
+}
+
+function persistMessages(msgs: ChatMessage[]) {
+    try {
+        // Keep newest MAX_PERSISTED (list is newest-first)
+        const toSave = msgs.filter((m) => !m.isStreaming).slice(0, MAX_PERSISTED);
+        mmkv.set(MESSAGES_KEY, JSON.stringify(toSave));
+    } catch {
+        // ignore storage errors
+    }
+}
+
+/** Merge two newest-first message arrays, deduplicating by timestamp+role+content. */
+function mergeMessages(a: ChatMessage[], b: ChatMessage[]): ChatMessage[] {
+    const seen = new Set<string>();
+    const result: ChatMessage[] = [];
+    for (const m of [...a, ...b]) {
+        const key = `${m.role}|${m.timestamp}|${m.content.slice(0, 40)}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            result.push(m);
+        }
+    }
+    // Sort newest-first
+    result.sort((x, y) => y.timestamp - x.timestamp);
+    return result;
+}
+
 export function useOpenClawChat() {
     const openclawToken = useLocalSetting('openclawToken');
     const openclawUrl = useLocalSetting('openclawUrl');
 
-    const [messages, setMessages] = React.useState<ChatMessage[]>([]);
+    const [messages, setMessages] = React.useState<ChatMessage[]>(() => loadPersistedMessages());
     const [status, setStatus] = React.useState<ConnectionStatus>('disconnected');
     const [isStreaming, setIsStreaming] = React.useState(false);
 
@@ -24,6 +65,24 @@ export function useOpenClawChat() {
     const reconnectTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const currentStreamRef = React.useRef<{ id: string; text: string } | null>(null);
     const connectedRef = React.useRef(false);
+    const persistTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Debounced persist so rapid streaming updates don't hammer storage
+    const schedulePerist = React.useCallback((msgs: ChatMessage[]) => {
+        if (persistTimerRef.current) clearTimeout(persistTimerRef.current);
+        persistTimerRef.current = setTimeout(() => persistMessages(msgs), 500);
+    }, []);
+
+    const setAndPersist = React.useCallback(
+        (updater: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
+            setMessages((prev) => {
+                const next = typeof updater === 'function' ? updater(prev) : updater;
+                schedulePerist(next);
+                return next;
+            });
+        },
+        [schedulePerist],
+    );
 
     const loadHistory = React.useCallback(() => {
         const ws = wsRef.current;
@@ -50,10 +109,10 @@ export function useOpenClawChat() {
                 return;
             }
 
-            // chat.history response
+            // chat.history response — merge with local instead of replacing
             if (payload && Array.isArray(payload.messages)) {
                 const raw = payload.messages as Array<Record<string, unknown>>;
-                const history: ChatMessage[] = raw
+                const apiMessages: ChatMessage[] = raw
                     .filter((m) => m.role === 'user' || m.role === 'assistant')
                     .map((m) => {
                         const contentRaw = m.content;
@@ -74,7 +133,8 @@ export function useOpenClawChat() {
                         };
                     })
                     .filter((m) => m.content.trim() !== ''); // skip empty messages (e.g. failed runs)
-                setMessages([...history].reverse()); // newest-first for inverted FlatList
+
+                setAndPersist((local) => mergeMessages(local, apiMessages));
                 return;
             }
         }
@@ -97,14 +157,14 @@ export function useOpenClawChat() {
                 if (!currentStreamRef.current) {
                     const id = randomUUID();
                     currentStreamRef.current = { id, text: chunk };
-                    setMessages((prev) => [
+                    setAndPersist((prev) => [
                         { id, role: 'assistant', content: chunk, timestamp: Date.now(), isStreaming: true },
                         ...prev,
                     ]); // prepend: newest-first for inverted FlatList
                 } else {
                     currentStreamRef.current.text = chunk; // each delta contains full text so far (not incremental)
                     const { id, text } = currentStreamRef.current;
-                    setMessages((prev) =>
+                    setAndPersist((prev) =>
                         prev.map((m) => (m.id === id ? { ...m, content: text } : m))
                     );
                 }
@@ -117,7 +177,7 @@ export function useOpenClawChat() {
 
                 if (currentStreamRef.current) {
                     const { id } = currentStreamRef.current;
-                    setMessages((prev) =>
+                    setAndPersist((prev) =>
                         prev.map((m) => (m.id === id ? { ...m, content: finalText, isStreaming: false } : m))
                     );
                     currentStreamRef.current = null;
@@ -126,7 +186,7 @@ export function useOpenClawChat() {
             } else if (state === 'error' || state === 'aborted') {
                 if (currentStreamRef.current) {
                     const { id } = currentStreamRef.current;
-                    setMessages((prev) =>
+                    setAndPersist((prev) =>
                         prev.map((m) => (m.id === id ? { ...m, isStreaming: false } : m))
                     );
                     currentStreamRef.current = null;
@@ -134,7 +194,7 @@ export function useOpenClawChat() {
                 setIsStreaming(false);
             }
         }
-    }, [loadHistory]);
+    }, [loadHistory, setAndPersist]);
 
     const connect = React.useCallback(() => {
         if (!openclawToken || !openclawUrl) return;
@@ -211,7 +271,7 @@ export function useOpenClawChat() {
             content: text,
             timestamp: Date.now(),
         };
-        setMessages((prev) => [userMessage, ...prev]); // prepend: newest-first for inverted FlatList
+        setAndPersist((prev) => [userMessage, ...prev]); // prepend: newest-first for inverted FlatList
         setIsStreaming(true);
 
         ws.send(JSON.stringify({
@@ -224,7 +284,7 @@ export function useOpenClawChat() {
                 idempotencyKey: randomUUID(),
             },
         }));
-    }, []);
+    }, [setAndPersist]);
 
     const abort = React.useCallback(() => {
         const ws = wsRef.current;
@@ -246,6 +306,7 @@ export function useOpenClawChat() {
         }
         return () => {
             if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+            if (persistTimerRef.current) clearTimeout(persistTimerRef.current);
             if (wsRef.current) {
                 wsRef.current.onclose = null;
                 wsRef.current.onerror = null;
