@@ -72,7 +72,8 @@ export function useOpenClawChat() {
                             content: text,
                             timestamp: typeof m.timestamp === 'number' ? m.timestamp : Date.now(),
                         };
-                    });
+                    })
+                    .filter((m) => m.content.trim() !== ''); // skip empty messages (e.g. failed runs)
                 setMessages([...history].reverse()); // newest-first for inverted FlatList
                 return;
             }
