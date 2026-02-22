@@ -2211,6 +2211,20 @@ class Sync {
             }
         }
 
+        // Handle agent notification
+        if (updateData.type === 'notification') {
+            if (Platform.OS !== 'web') {
+                Notifications.scheduleNotificationAsync({
+                    content: {
+                        title: 'Agent',
+                        body: updateData.message,
+                        sound: true
+                    },
+                    trigger: null
+                }).catch(() => {});
+            }
+        }
+
         // daemon-status ephemeral updates are deprecated, machine status is handled via machine-activity
     }
 

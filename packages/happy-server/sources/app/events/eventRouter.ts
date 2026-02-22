@@ -180,6 +180,10 @@ export type EphemeralEvent = {
     machineId: string;
     online: boolean;
     timestamp: number;
+} | {
+    type: 'notification';
+    message: string;
+    timestamp: number;
 };
 
 // === EVENT PAYLOAD TYPES ===
